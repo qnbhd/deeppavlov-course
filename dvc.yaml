@@ -1,0 +1,47 @@
+stages:
+  preprocess:
+    cmd: |
+      python src/cli.py preprocess data/Ethos_Dataset_Binary.csv --output data/preprocessed.csv ${preprocess.remove_punct} ${preprocess.remove_emails} ${preprocess.remove_numbers} ${preprocess.remove_stop}
+    deps:
+    - src/cli.py
+    - data/Ethos_Dataset_Binary.csv
+    params:
+    - preprocess.remove_punct
+    - preprocess.remove_emails
+    - preprocess.remove_numbers
+    - preprocess.remove_stop
+    outs:
+    - data/preprocessed.csv
+  split:
+    cmd:
+      - python src/cli.py split data/preprocessed.csv --random-state ${split.random_state} --test-size ${split.test_size} --output-train data/train.csv --output-test data/test.csv
+    deps:
+    - src/cli.py
+    - data/preprocessed.csv
+    params:
+    - split.random_state
+    - split.test_size
+    outs:
+    - data/test.csv
+    - data/train.csv
+  train:
+    cmd: python src/cli.py train data/train.csv --embeddings-model=${train.embeddings_model} --metric=${train.metric} -o model.joblib
+    deps:
+    - src/cli.py
+    - data/train.csv
+    params:
+    - train.embeddings_model
+    - train.metric
+    outs:
+    - model.joblib
+  evaluate:
+    cmd: python src/cli.py evaluate --model-path model.joblib data/test.csv --embeddings-model=${train.embeddings_model} --report-output eval/live/metrics.json
+    deps:
+    - src/cli.py
+    - data/test.csv
+    - model.joblib
+    params:
+      - train.embeddings_model
+    metrics:
+      - eval/live/metrics.json:
+          cache: false
