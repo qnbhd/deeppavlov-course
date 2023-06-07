@@ -1,0 +1,13 @@
+preprocess:
+  remove_punct: true
+  remove_emails: true
+  remove_numbers: false
+  remove_stop: true
+
+split:
+  random_state: 42
+  test_size: 0.33
+
+train:
+  embeddings_model: all-distilroberta-v1
+  metric: manhattan
