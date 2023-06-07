@@ -1,0 +1,82 @@
+schema: '2.0'
+stages:
+  preprocess:
+    cmd: "python src/cli.py preprocess data/Ethos_Dataset_Binary.csv --output data/preprocessed.csv
+      --remove-punct=true --remove-emails=true --remove-numbers=false --remove-stop=true\n"
+    deps:
+    - path: data/Ethos_Dataset_Binary.csv
+      md5: d475a0a4e09db8d6a405b6c9fb962da3
+      size: 123919
+    - path: src/cli.py
+      md5: e0c0f5718f88bd941bc0a22fdb4dc56b
+      size: 5973
+    params:
+      params.yaml:
+        preprocess.remove_emails: true
+        preprocess.remove_numbers: false
+        preprocess.remove_punct: true
+        preprocess.remove_stop: true
+    outs:
+    - path: data/preprocessed.csv
+      md5: e797a7b9756466584854f967502a9e1f
+      size: 64636
+  split:
+    cmd:
+    - python src/cli.py split data/preprocessed.csv --random-state 42 --test-size
+      0.33 --output-train data/train.csv --output-test data/test.csv
+    deps:
+    - path: data/preprocessed.csv
+      md5: e797a7b9756466584854f967502a9e1f
+      size: 64636
+    - path: src/cli.py
+      md5: e0c0f5718f88bd941bc0a22fdb4dc56b
+      size: 5973
+    params:
+      params.yaml:
+        split.random_state: 42
+        split.test_size: 0.33
+    outs:
+    - path: data/test.csv
+      md5: bb166e9df15606f5f9820a6696618c89
+      size: 23016
+    - path: data/train.csv
+      md5: 197b5f7ab7352c88a014137395faeb4f
+      size: 41635
+  train:
+    cmd: python src/cli.py train data/train.csv --embeddings-model=all-distilroberta-v1
+      --metric=euclidean -o model.joblib
+    deps:
+    - path: data/train.csv
+      md5: 197b5f7ab7352c88a014137395faeb4f
+      size: 41635
+    - path: src/cli.py
+      md5: e0c0f5718f88bd941bc0a22fdb4dc56b
+      size: 5973
+    params:
+      params.yaml:
+        train.embeddings_model: all-distilroberta-v1
+        train.metric: euclidean
+    outs:
+    - path: model.joblib
+      md5: 8dbfc8868738ca9bc7e39707b27dbeda
+      size: 12791
+  evaluate:
+    cmd: python src/cli.py evaluate --model-path model.joblib data/test.csv --embeddings-model=all-distilroberta-v1
+      --report-output eval/live/metrics.json
+    deps:
+    - path: data/test.csv
+      md5: bb166e9df15606f5f9820a6696618c89
+      size: 23016
+    - path: model.joblib
+      md5: 8dbfc8868738ca9bc7e39707b27dbeda
+      size: 12791
+    - path: src/cli.py
+      md5: e0c0f5718f88bd941bc0a22fdb4dc56b
+      size: 5973
+    params:
+      params.yaml:
+        train.embeddings_model: all-distilroberta-v1
+    outs:
+    - path: eval/live/metrics.json
+      md5: 799f1a1e8c83a9d391f815318ca67306
+      size: 174
