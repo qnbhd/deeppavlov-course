@@ -1,7 +1,7 @@
 preprocess:
   remove_punct: true
   remove_emails: true
-  remove_numbers: true
+  remove_numbers: false
   remove_stop: true
 
 split:

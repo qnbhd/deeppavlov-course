@@ -1,0 +1,6 @@
+preprocess.remove_punct: false
+preprocess.remove_number: true
+preprocess.remove_emails: true
+preprocess.remove_stop: true
+train.embeddings_model: multi-qa-distilbert-cos-v1
+train.metric: euclidean

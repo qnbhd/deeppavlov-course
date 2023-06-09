@@ -2,7 +2,7 @@ schema: '2.0'
 stages:
   preprocess:
     cmd: "python src/cli.py preprocess data/Ethos_Dataset_Binary.csv --output data/preprocessed.csv
-      --remove-punct=true --remove-emails=true --remove-numbers=true --remove-stop=true\n"
+      --remove-punct=false --remove-emails=false --remove-numbers=false --remove-stop=false\n"
     deps:
     - path: data/Ethos_Dataset_Binary.csv
       md5: d475a0a4e09db8d6a405b6c9fb962da3
@@ -12,22 +12,22 @@ stages:
       size: 4241
     params:
       params.yaml:
-        preprocess.remove_emails: true
-        preprocess.remove_numbers: true
-        preprocess.remove_punct: true
-        preprocess.remove_stop: true
+        preprocess.remove_emails: false
+        preprocess.remove_numbers: false
+        preprocess.remove_punct: false
+        preprocess.remove_stop: false
     outs:
     - path: data/preprocessed.csv
-      md5: ab2827cde27ec0bede4df5d77f73e5dd
-      size: 64313
+      md5: fdd2b4ed48a4948906a76da29779d97b
+      size: 115430
   split:
     cmd:
     - python src/cli.py split data/preprocessed.csv --random-state 42 --test-size
       0.33 --output-train data/train.csv --output-test data/test.csv
     deps:
     - path: data/preprocessed.csv
-      md5: ab2827cde27ec0bede4df5d77f73e5dd
-      size: 64313
+      md5: fdd2b4ed48a4948906a76da29779d97b
+      size: 115430
     - path: src/cli.py
       md5: ca0127fda9d1304082fb6f72321e08c2
       size: 4241
@@ -37,46 +37,46 @@ stages:
         split.test_size: 0.33
     outs:
     - path: data/test.csv
-      md5: 2c21773b55af7cf9e531e0dd4f3e16bd
-      size: 22888
+      md5: ae38f62929cd137156b080d0bbc9fded
+      size: 40316
     - path: data/train.csv
-      md5: 5fd90de198f06c0f6287b097dc88c2e8
-      size: 41440
+      md5: 1468510697faa1815cf338344adedfef
+      size: 75129
   train:
-    cmd: python src/cli.py train data/train.csv --embeddings-model=all-distilroberta-v1
-      --metric=manhattan -o model.joblib
+    cmd: python src/cli.py train data/train.csv --embeddings-model=multi-qa-distilbert-cos-v1
+      --metric=euclidean -o model.joblib
     deps:
     - path: data/train.csv
-      md5: 5fd90de198f06c0f6287b097dc88c2e8
-      size: 41440
+      md5: 1468510697faa1815cf338344adedfef
+      size: 75129
     - path: src/cli.py
       md5: ca0127fda9d1304082fb6f72321e08c2
       size: 4241
     params:
       params.yaml:
-        train.embeddings_model: all-distilroberta-v1
-        train.metric: manhattan
+        train.embeddings_model: multi-qa-distilbert-cos-v1
+        train.metric: euclidean
     outs:
     - path: model.joblib
-      md5: f1846a9c07f34e859e08c326c19eceb0
+      md5: a17e1f50d327469bc4c9e1e2251dec2b
       size: 12791
   evaluate:
-    cmd: python src/cli.py evaluate --model-path model.joblib data/test.csv --embeddings-model=all-distilroberta-v1
+    cmd: python src/cli.py evaluate --model-path model.joblib data/test.csv --embeddings-model=multi-qa-distilbert-cos-v1
       --report-output eval/live/metrics.json
     deps:
     - path: data/test.csv
-      md5: 2c21773b55af7cf9e531e0dd4f3e16bd
-      size: 22888
+      md5: ae38f62929cd137156b080d0bbc9fded
+      size: 40316
     - path: model.joblib
-      md5: f1846a9c07f34e859e08c326c19eceb0
+      md5: a17e1f50d327469bc4c9e1e2251dec2b
       size: 12791
     - path: src/cli.py
       md5: ca0127fda9d1304082fb6f72321e08c2
       size: 4241
     params:
       params.yaml:
-        train.embeddings_model: all-distilroberta-v1
+        train.embeddings_model: multi-qa-distilbert-cos-v1
     outs:
     - path: eval/live/metrics.json
-      md5: be7c839555ea0e932c82b2a15f9cb5da
-      size: 175
+      md5: 03c7d3ec0ae6ee750af79b5ad29df120
+      size: 173
